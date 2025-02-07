@@ -3,7 +3,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const router = express.Router();
 
-router.get('/api/meta-analyzer', async (req, res) => {
+router.get('/meta-analyzer', async (req, res) => {
   try {
     const { url } = req.query;
 
@@ -11,12 +11,25 @@ router.get('/api/meta-analyzer', async (req, res) => {
       return res.status(400).json({ error: 'URL is required' });
     }
 
-    // Fetch the webpage
-    const response = await axios.get(url);
+    let response;
+    try {
+      response = await axios.get(url, {
+        timeout: 5000, // 5 seconds timeout
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+      });
+    } catch (axiosError) {
+      console.error('Axios error:', axiosError.message);
+      return res.status(500).json({ 
+        error: 'Failed to fetch the URL', 
+        details: axiosError.message 
+      });
+    }
+
     const html = response.data;
     const $ = cheerio.load(html);
 
-    // Extract meta information
     const metaData = {
       title: $('title').text() || $('meta[property="og:title"]').attr('content'),
       description: $('meta[name="description"]').attr('content'),
@@ -43,7 +56,10 @@ router.get('/api/meta-analyzer', async (req, res) => {
     res.json(metaData);
   } catch (error) {
     console.error('Error analyzing meta tags:', error);
-    res.status(500).json({ error: 'Failed to analyze meta tags' });
+    res.status(500).json({ 
+      error: 'Failed to analyze meta tags',
+      details: error.message
+    });
   }
 });
 

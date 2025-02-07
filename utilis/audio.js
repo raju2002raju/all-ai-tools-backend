@@ -40,12 +40,13 @@ Output: "The cat <b>jumped</b> <b>over</b> the fence"`;
 }
 
 async function convertEnglish(text, variant) {
+  // "Convert the following text to British English, correcting any spelling and grammar mistakes. Highlight all changes in red colour using HTML <span style="color: red;"> tags to show the modifications."
   try {
     let prompt;
     if (variant === 'UK') {
-      prompt = `Convert the following text to British English, correcting spelling and grammar where needed: "${text}"`;
+      prompt = ` Convert the following text to British English, correcting spelling and grammar where needed and Highlight all changes in red colour using HTML <span style="color: red;">updated text </span>  : "${text}"`;
     } else {
-      prompt = `Convert the following text to American English, correcting spelling and grammar where needed: "${text}"`;
+      prompt = `Convert the following text to American English, correcting spelling and grammar where needed and Highlight all changes in red colour using HTML <span style="color: red;">updated text </span> : "${text}"`;
     }
     
     const response = await openai.chat.completions.create({
@@ -237,14 +238,15 @@ async function SentenceChecker(text) {
 async function rewordingTool(text) {
   try {
 
-    let prompt = `You are an advanced rewording and highlighting tool. Your task is to rephrase given text and highlight significant changes. Please perform the following actions:
+    let prompt = `You are an advanced rewording and highlighting tool. Your task is to rephrase the following sentence while retaining its original meaning.  
 
-Read and understand the provided text.
-Rewrite the text in a way that preserves the original meaning but varies word choice and sentence structure.
-Highlight significant changes made in the rewritten text. Use bold text for highlighting.
-Provide both the original and rewritten text for comparison.
+- Only highlight words or phrases that have been modified or change using a <span> tag with background: #F8FF00.  
+- Keep unchanged words as they are without any highlighting.  
 
-Please reword and highlight the following text: \n\n${text}`;
+Original: "${text}"  
+Rephrased: "[Your rephrased sentence here, ensuring all modified words are wrapped in <span style='background: #F8FF00;'>highlighted</span> tags.]"
+"
+`;
     
     const response = await openai.chat.completions.create({
       model: 'gpt-4',
@@ -266,27 +268,17 @@ Please reword and highlight the following text: \n\n${text}`;
 
 async function PunctuationChecker(text) {
   try {
-    let prompt = `You are an advanced punctuation checker and correction tool. Your task is to analyze the given text for punctuation errors, correct them, and provide only the corrected punctuation. Follow these steps:
+    let prompt = `You are an advanced punctuation and grammar checker. Your task is to analyze the given text for punctuation, spelling, and capitalization errors, correct them, and highlight only the corrected parts.
 
-Carefully examine the provided text for any punctuation errors.
-Identify and correct all punctuation mistakes, including but not limited to:
+### **Instructions:**  
+- Identify and correct **punctuation mistakes** (periods, commas, semicolons, colons, quotation marks, apostrophes, hyphens, etc.).  
+- Fix **spelling and capitalization** errors while maintaining the original meaning.  
+- Keep the **original text structure** intact.  
+- Highlight **only the corrected words and punctuation** using "<span style='background: #F8FF00;'>...</span>".  
 
-Missing or misplaced periods, commas, semicolons, and colons
-Incorrect use of quotation marks, apostrophes, and hyphens
-Improper capitalization
-Spacing issues around punctuation marks
-
-
-Do not alter any words or change the original text structure.
-Output only the corrected punctuation marks and capitalization, preserving their positions relative to the original text.
-Use underscores (_) to represent spaces between words and line breaks.
-
-For example, if the input is:
-"hello world how are you today"
-Your output might be:
-"______,_____?"
-This represents: "Hello world, how are you today?"
-Please provide the corrected punctuation for the following text: \n\n${text}`;
+#### **Input:**  
+${text}
+`;
     
     const response = await openai.chat.completions.create({
       model: 'gpt-4',
@@ -529,7 +521,7 @@ Please extensively reword and enhance the following text, ensuring more than 10 
     console.log('Error during rewrite paragraph', error);
     throw new Error('Rewrite failed');
   }
-}
+}   
 
 async function EssayRewriterfunction(text) {
   try {
